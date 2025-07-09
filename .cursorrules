@@ -1,0 +1,113 @@
+# Cursor Rules - Generic Development Guidelines
+
+## Code Style & Formatting
+- Use consistent indentation (2 or 4 spaces, no tabs)
+- Keep line length under 100 characters when possible
+- Use meaningful variable and function names (descriptive, not abbreviated)
+- Follow language-specific naming conventions (camelCase for JS/TS, snake_case for Python, etc.)
+- Add trailing commas in multi-line objects/arrays where supported
+- Use single quotes for strings unless double quotes are required
+- Remove unused imports and variables
+
+## Code Organization
+- Keep functions small and focused (single responsibility principle)
+- Group related functionality into modules/classes
+- Use clear folder structure that reflects the application architecture
+- Separate concerns: business logic, UI components, utilities, types/interfaces
+- Keep configuration files at the root level
+- Use index files for clean imports when appropriate
+
+## Documentation & Comments
+- Write clear, concise comments for complex logic
+- Use JSDoc/docstrings for function documentation
+- Include README.md with setup instructions and project overview
+- Document API endpoints and data structures
+- Explain "why" not "what" in comments
+- Keep comments up-to-date with code changes
+
+## Error Handling & Validation
+- Always handle potential errors and edge cases
+- Use try-catch blocks appropriately
+- Validate user inputs and external data
+- Provide meaningful error messages
+- Log errors with sufficient context for debugging
+- Fail fast when possible
+
+## Security Best Practices
+- Never commit sensitive data (API keys, passwords, tokens)
+- Use environment variables for configuration
+- Validate and sanitize all inputs
+- Use HTTPS for external requests
+- Follow principle of least privilege
+- Keep dependencies updated
+
+## Performance Considerations
+- Avoid premature optimization, but be mindful of obvious performance issues
+- Use appropriate data structures for the task
+- Minimize API calls and database queries
+- Implement caching where beneficial
+- Optimize images and assets
+- Use lazy loading for large datasets
+
+## Testing
+- Write unit tests for core business logic
+- Test edge cases and error conditions
+- Use descriptive test names that explain the scenario
+- Keep tests simple and focused
+- Mock external dependencies
+- Aim for good test coverage but focus on critical paths
+
+## Dependencies & Libraries
+- Prefer well-maintained, popular libraries
+- Keep dependencies minimal and justified
+- Update dependencies regularly but test thoroughly
+- Use exact versions in production
+- Document why specific libraries were chosen
+
+## Git & Version Control
+- Write clear, descriptive commit messages
+- Use conventional commit format when possible
+- Keep commits atomic and focused
+- Use branches for features and fixes
+- Review code before merging
+- Don't commit generated files or build artifacts
+
+## Code Quality
+- Follow SOLID principles
+- Prefer composition over inheritance
+- Use TypeScript/type hints where available
+- Avoid deep nesting (max 3-4 levels)
+- Extract magic numbers into named constants
+- Use early returns to reduce nesting
+
+## Environment & Configuration
+- Use separate configurations for dev/staging/production
+- Make the application configurable through environment variables
+- Provide sensible defaults for development
+- Document all configuration options
+- Use .env files for local development (but don't commit them)
+
+## API Design (if applicable)
+- Use RESTful conventions
+- Return consistent response formats
+- Include proper HTTP status codes
+- Version your APIs
+- Document endpoints clearly
+- Handle rate limiting and pagination
+
+## Database (if applicable)
+- Use migrations for schema changes
+- Index frequently queried columns
+- Avoid N+1 queries
+- Use transactions for multi-step operations
+- Backup data regularly
+- Follow naming conventions for tables/columns
+
+## General Guidelines
+- Write code as if the person maintaining it is a violent psychopath who knows where you live
+- Prefer explicit over implicit
+- Don't repeat yourself (DRY principle)
+- Make it work, make it right, make it fast (in that order)
+- Code should be self-documenting when possible
+- Always consider the user experience
+- Be consistent with existing codebase patterns 
