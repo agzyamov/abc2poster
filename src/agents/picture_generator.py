@@ -95,50 +95,142 @@ class PictureGeneratorAgent:
     
     def generate_prompt(self, letter: str, word: str) -> str:
         """
-        Generate a prompt for DALL-E image generation.
+        Generate a prompt for DALL-E image generation with ultra-specific Cyrillic character instructions.
         
         Args:
-            letter: The capital Cyrillic letter
-            word: The Russian word to illustrate
+            letter: The Russian letter to feature
+            word: The Russian word starting with the letter
             
         Returns:
-            Formatted prompt string
+            Detailed prompt for DALL-E 3 with pixel-level Cyrillic specifications
         """
-        return f"""Create a Russian educational alphabet card exactly like this style: a card with colored border, large letter at top, illustration in middle, and word at bottom.
+        
+        # Ultra-specific Cyrillic character pixel descriptions
+        pixel_descriptions = {
+            'Г': '''Russian letter Г: Vertical line on left, horizontal line at top (like upside-down L)
+                    EXACT SHAPE: |‾ (vertical bar with horizontal line on top-right only)
+                    NOT: L, T, F, or any Latin letter''',
+            'А': '''Russian letter А: Two diagonal lines meeting at top, horizontal crossbar in middle
+                    EXACT SHAPE: /\\\ with horizontal line through middle
+                    Similar to English A but wider at top''',
+            'Б': '''Russian letter Б: Vertical line on left, horizontal line at top, curved bottom part
+                    EXACT SHAPE: Like number 6 but with top horizontal line
+                    NOT English B (which has two bumps)''',
+            'В': '''Russian letter В: Vertical line on left, two horizontal bumps (upper smaller than lower)
+                    EXACT SHAPE: Similar to English B but different proportions
+                    Upper bump smaller, lower bump larger''',
+            'Д': '''Russian letter Д: Triangle shape with two legs extending below
+                    EXACT SHAPE: Like upside-down U with extended legs
+                    Base extends beyond the triangle''',
+            'Е': '''Russian letter Е: Exactly identical to English letter E
+                    EXACT SHAPE: Vertical line with three horizontal lines (top, middle, bottom)''',
+            'Ж': '''Russian letter Ж: Like asterisk or three lines crossing at center
+                    EXACT SHAPE: * but with straight lines, like ><|
+                    Three lines meeting at center point''',
+            'З': '''Russian letter З: Exactly like English number 3
+                    EXACT SHAPE: Two curves opening to the left
+                    Like backwards C stacked''',
+            'И': '''Russian letter И: Like backwards English N
+                    EXACT SHAPE: Two vertical lines connected by diagonal (bottom-left to top-right)
+                    Mirror image of English N''',
+            'К': '''Russian letter К: Exactly identical to English letter K
+                    EXACT SHAPE: Vertical line with two diagonal lines meeting at middle''',
+            'Л': '''Russian letter Л: Like upside-down V with small feet
+                    EXACT SHAPE: /\\ but with small horizontal extensions at bottom
+                    Like lambda (λ) but upright''',
+            'М': '''Russian letter М: Exactly identical to English letter M
+                    EXACT SHAPE: Two vertical lines connected by inverted V at top''',
+            'Н': '''Russian letter Н: Exactly identical to English letter H
+                    EXACT SHAPE: Two vertical lines connected by horizontal crossbar''',
+            'О': '''Russian letter О: Exactly identical to English letter O
+                    EXACT SHAPE: Perfect circle or oval''',
+            'П': '''Russian letter П: Like Greek Pi (π) but squared
+                    EXACT SHAPE: Two vertical lines connected by horizontal line at top
+                    Like upside-down U but with sharp corners''',
+            'Р': '''Russian letter Р: Exactly identical to English letter P
+                    EXACT SHAPE: Vertical line with horizontal bump at top''',
+            'С': '''Russian letter С: Exactly identical to English letter C
+                    EXACT SHAPE: Circle with opening on right side''',
+            'Т': '''Russian letter Т: Exactly identical to English letter T
+                    EXACT SHAPE: Horizontal line at top with vertical line down the center''',
+            'У': '''Russian letter У: Like English letter Y
+                    EXACT SHAPE: Two diagonal lines meeting at center, continuing down as single line''',
+            'Ф': '''Russian letter Ф: Circle with vertical line through center
+                    EXACT SHAPE: O with | through middle, like Φ (phi)
+                    Line extends above and below circle''',
+            'Х': '''Russian letter Х: Exactly identical to English letter X
+                    EXACT SHAPE: Two diagonal lines crossing at center''',
+            'Ц': '''Russian letter Ц: Like Russian И but with small tail at bottom-right
+                    EXACT SHAPE: И + small horizontal line at bottom-right corner''',
+            'Ч': '''Russian letter Ч: Like number 4
+                    EXACT SHAPE: Vertical line on right, horizontal line connecting to shorter vertical on left''',
+            'Ш': '''Russian letter Ш: Like English W but with straight vertical lines
+                    EXACT SHAPE: Three vertical lines connected by horizontal line at bottom
+                    NOT curved like English W''',
+            'Щ': '''Russian letter Щ: Like Ш but with small tail at bottom-right
+                    EXACT SHAPE: Ш + small horizontal line extending right from bottom-right''',
+            'Ъ': '''Russian letter Ъ (hard sign): Like lowercase b with horizontal line
+                    EXACT SHAPE: Vertical line + horizontal line + small curve at bottom''',
+            'Ы': '''Russian letter Ы: Like bl connected together
+                    EXACT SHAPE: Vertical line, gap, then vertical line with small curve (like ь)''',
+            'Ь': '''Russian letter Ь (soft sign): Like small lowercase b
+                    EXACT SHAPE: Vertical line with small horizontal line and curve at bottom''',
+            'Э': '''Russian letter Э: Like backwards C with horizontal line through middle
+                    EXACT SHAPE: Backwards C + horizontal line through center''',
+            'Ю': '''Russian letter Ю: Like letters I and O connected
+                    EXACT SHAPE: Vertical line connected to circle by horizontal line''',
+            'Я': '''Russian letter Я: Like backwards English R
+                    EXACT SHAPE: Mirror image of English R, opens to the left'''
+        }
+        
+        # Get specific pixel description for this letter
+        char_description = pixel_descriptions.get(letter, f'Russian letter {letter}')
+        
+        prompt = f"""
+        Create a Russian children's educational alphabet card.
 
-EXACT LAYOUT REQUIRED (copy this style):
+        🚨 CRITICAL CHARACTER SPECIFICATIONS:
 
-CARD STRUCTURE:
-- Colored border frame around the entire card
-- Card has a warm, child-friendly color scheme
-- Square format with rounded corners
+        LETTER "{letter}" REQUIREMENTS:
+        {char_description}
+        
+        FONT SPECIFICATIONS FOR "{letter}":
+        • Use basic Arial or Times New Roman style
+        • Completely BLACK color (#000000) on WHITE background
+        • Size: ENORMOUS - takes up 25% of image height  
+        • Placement: TOP CENTER of image
+        • NO artistic styling, NO decorations, NO shadows
+        • Shape must be EXACTLY as described above
 
-TOP SECTION (header):
-- Large Cyrillic capital letter "{letter}" in bold, dark font
-- Letter sits on a colored background strip at the top
-- Letter should be very large and clearly readable
+        WORD "{word}" REQUIREMENTS:
+        • Each letter must be perfect standard Russian Cyrillic
+        • Completely BLACK color (#000000) on WHITE background
+        • Font: Basic sans-serif (Arial/Helvetica style)
+        • Size: LARGE - takes up 15% of image height
+        • Placement: BOTTOM CENTER of image
+        • Perfect letter spacing for readability
 
-MIDDLE SECTION (main area - largest part):
-- Large, cute cartoon illustration of a {word}
-- Clean, simple cartoon style like children's books
-- Bright colors on light/white background
-- Illustration should fill most of the middle space
-- Style similar to: drum with drumsticks, cute wolf character, red mushroom
+        ILLUSTRATION REQUIREMENTS:
+        • Simple, clean illustration of {word} in center
+        • Child-friendly cartoon style
+        • Bright colors for the illustration only
+        • NO text overlaid on the illustration
 
-BOTTOM SECTION (footer):
-- Russian word "{word}" in clear Cyrillic letters
-- Word sits on a colored background strip at the bottom
-- Text should be bold and easily readable
+        LAYOUT:
+        [TOP 30%]: Giant letter "{letter}" - black on white/bright background
+        [MIDDLE 40%]: Simple illustration of {word}
+        [BOTTOM 30%]: Word "{word}" - black on white/bright background
 
-VISUAL STYLE REQUIREMENTS:
-- Copy the exact style from examples: Б/барабан (drum), В/волк (wolf), Г/гриб (mushroom)
-- Simple, clean cartoon illustrations
-- Warm, educational color palette
-- Clear contrast between text and backgrounds
-- Child-friendly, approachable design
-- Professional educational card quality
+        CRITICAL SUCCESS CRITERIA:
+        • Letter "{letter}" must be recognizable by Russian text recognition software
+        • Word "{word}" must be readable by Russian OCR systems
+        • Use only standard typography (no decorative fonts)
+        • Maximum text contrast (black on white/bright)
 
-CRITICAL: The letter "{letter}" and word "{word}" MUST be clearly visible with good contrast against their colored background sections."""
+        Create a professional Russian educational poster with perfect Cyrillic typography.
+        """
+        
+        return prompt.strip()
     
     def generate_image(self, letter: str, word: str) -> str:
         """
@@ -361,7 +453,8 @@ CRITICAL: The letter "{letter}" and word "{word}" MUST be clearly visible with g
     
     def improve_prompt_based_on_ocr_failure(self, letter: str, word: str, ocr_result: Dict, attempt: int) -> str:
         """
-        Generate an improved prompt based on OCR validation failures.
+        Generate an enhanced prompt with aggressive Cyrillic-specific improvements based on OCR validation failures.
+        Uses advanced prompt engineering to force DALL-E 3 to generate proper Russian characters.
         
         Args:
             letter: The target letter
@@ -370,70 +463,107 @@ CRITICAL: The letter "{letter}" and word "{word}" MUST be clearly visible with g
             attempt: Current attempt number (1-based)
             
         Returns:
-            Improved prompt string
+            Improved prompt string with advanced Cyrillic text generation techniques
         """
-        base_improvements = []
         
-        # Analyze OCR failure patterns
-        if not ocr_result["letter_found"]:
-            base_improvements.extend([
-                f"CRITICAL: The letter '{letter}' MUST be clearly visible and readable",
-                f"Place a giant, bold '{letter}' character at the very top with high contrast",
-                f"Use thick, black '{letter}' on bright colored background"
-            ])
+        # Advanced Cyrillic character descriptions for DALL-E 3
+        cyrillic_descriptions = {
+            'А': 'Russian А (triangle-like, wider at top than English A)',
+            'Б': 'Russian Б (has horizontal line at top and curved bottom, NOT English B)', 
+            'В': 'Russian В (similar to English B but different proportions)',
+            'Г': 'Russian Г (shaped like upside-down L or Greek Gamma)',
+            'Д': 'Russian Д (like triangle with legs extending below)',
+            'Е': 'Russian Е (identical to English E)',
+            'Ё': 'Russian Ё (like Е with two dots above)',
+            'Ж': 'Russian Ж (like asterisk or snowflake pattern)',
+            'З': 'Russian З (like English number 3)',
+            'И': 'Russian И (like backwards English N)',
+            'Й': 'Russian Й (like И with curved breve above)',
+            'К': 'Russian К (identical to English K)',
+            'Л': 'Russian Л (like upside-down V with feet)',
+            'М': 'Russian М (identical to English M)',
+            'Н': 'Russian Н (identical to English H)',
+            'О': 'Russian О (identical to English O)',
+            'П': 'Russian П (like Greek Pi)',
+            'Р': 'Russian Р (identical to English P)',
+            'С': 'Russian С (identical to English C)',
+            'Т': 'Russian Т (identical to English T)',
+            'У': 'Russian У (like English Y)',
+            'Ф': 'Russian Ф (like circle with vertical line through center)',
+            'Х': 'Russian Х (identical to English X)',
+            'Ц': 'Russian Ц (like И with small tail at bottom right)',
+            'Ч': 'Russian Ч (like number 4)',
+            'Ш': 'Russian Ш (like English W but with vertical straight lines)',
+            'Щ': 'Russian Щ (like Ш with small tail at bottom right)',
+            'Ъ': 'Russian Ъ (hard sign - like b with horizontal line)',
+            'Ы': 'Russian Ы (like bl connected together)',
+            'Ь': 'Russian Ь (soft sign - like small b)',
+            'Э': 'Russian Э (like backwards C with horizontal line in middle)',
+            'Ю': 'Russian Ю (like IO connected together)',
+            'Я': 'Russian Я (like backwards R)'
+        }
         
-        if not ocr_result["word_found"]:
-            base_improvements.extend([
-                f"CRITICAL: The word '{word}' MUST be clearly visible and readable",
-                f"Place '{word}' in large, bold Cyrillic letters at the bottom",
-                f"Use high contrast colors for the word '{word}' - black text on bright background"
-            ])
-        
-        # Progressive improvements based on attempt number
+        # Progressive intensity based on attempt
         if attempt == 2:
-            intensity_level = "EXTREMELY IMPORTANT"
-            additional_requirements = [
-                "Use maximum text contrast - black text on white/bright backgrounds",
-                "Make text significantly larger than before",
-                "Ensure text is the main focus, not decorative elements"
-            ]
+            intensity = "CYRILLIC EMERGENCY MODE"
+            urgency = "EXTREMELY CRITICAL"
         elif attempt == 3:
-            intensity_level = "ABSOLUTELY CRITICAL"
-            additional_requirements = [
-                "Text must be ENORMOUS and impossible to miss",
-                "Use only black text on pure white backgrounds for maximum readability",
-                "Minimize decorative elements that might interfere with text recognition",
-                "Focus on text clarity over artistic beauty"
-            ]
+            intensity = "MAXIMUM CYRILLIC ENFORCEMENT"
+            urgency = "ABSOLUTELY CRITICAL - FINAL ATTEMPT"
         else:
-            intensity_level = "IMPORTANT"
-            additional_requirements = ["Ensure clear, readable text placement"]
+            intensity = "CYRILLIC FOCUS MODE"
+            urgency = "IMPORTANT"
         
-        # Build improved prompt
+        # Get specific character descriptions
+        letter_desc = cyrillic_descriptions.get(letter, f'Russian letter {letter}')
+        
+        # Build ultra-aggressive Cyrillic prompt
         improved_prompt = f"""
-        {intensity_level}: Create a Russian educational card with PERFECT TEXT VISIBILITY (Attempt {attempt}/3).
+        {intensity}: {urgency} - Russian educational card with PERFECT CYRILLIC TYPOGRAPHY (Attempt {attempt}/3)
 
-        Previous OCR attempt detected: {ocr_result.get('detected_text', [])}
-        But failed to find: {letter if not ocr_result['letter_found'] else ''} {word if not ocr_result['word_found'] else ''}
+        PREVIOUS FAILURE ANALYSIS:
+        OCR failed to detect proper Cyrillic: {ocr_result.get('detected_text', [])}
+        REQUIRED: Russian letter "{letter}" and word "{word}"
 
-        MANDATORY TEXT REQUIREMENTS:
-        {chr(10).join('- ' + req for req in base_improvements)}
-        {chr(10).join('- ' + req for req in additional_requirements)}
+        🚨 CRITICAL CYRILLIC INSTRUCTIONS FOR DALL-E 3:
 
-        CARD STRUCTURE (copy reference examples exactly):
-        TOP: Large Cyrillic letter "{letter}" - black, bold, huge font on colored background
-        MIDDLE: Cute illustration of {word} (simple, clean cartoon style)
-        BOTTOM: Russian word "{word}" - black, bold, large font on colored background
+        1. LETTER GENERATION - "{letter}":
+        • Generate authentic {letter_desc}
+        • Use STANDARD Russian textbook typography (ГОСТ 2.304-81)
+        • BLACK text on WHITE/bright background for maximum contrast
+        • Size: HUGE - minimum 25% of total image height
+        • Font: Basic, undecorated, standard Russian school font
+        • NO Latin substitutes: avoid B≠В, P≠Р, H≠Н, etc.
 
-        CRITICAL SUCCESS CRITERIA:
-        - OCR must be able to read letter "{letter}" clearly
-        - OCR must be able to read word "{word}" clearly
-        - Use fonts that OCR can easily recognize
-        - Maximum contrast between text and background
-        - Text size should be at least 20% of image height for each text element
+        2. WORD GENERATION - "{word}":
+        • Each character must be perfect Cyrillic from Russian alphabet
+        • Use elementary school Russian textbook font style
+        • BLACK text on WHITE/bright background
+        • Size: LARGE - minimum 15% of total image height
+        • Clear spacing between letters for OCR readability
 
-        Style: Bright, child-friendly, educational card with colored border frame.
-        Reference: Б/барабан, В/волк, Г/гриб examples with clear text visibility.
+        3. ANTI-DECORATIVE RULES:
+        • NO artistic fonts, NO stylization, NO decorative elements on text
+        • NO shadows, gradients, or effects on the Cyrillic text
+        • Text must look like Russian government document or textbook
+        • Prioritize TEXT READABILITY over visual beauty
+
+        4. LAYOUT REQUIREMENTS:
+        [TOP 30%]: Giant Russian letter "{letter}" - plain black on white/bright
+        [MIDDLE 40%]: Simple illustration of {word} 
+        [BOTTOM 30%]: Russian word "{word}" - plain black on white/bright
+
+        5. OCR OPTIMIZATION:
+        • Text contrast ratio minimum 7:1 (black on white ideal)
+        • Use fonts similar to: Arial, Times New Roman, or basic sans-serif
+        • NO cursive, handwriting, or decorative fonts
+        • Letters must be perfectly formed according to Russian standards
+
+        REFERENCE STANDARD: Russian elementary school ABC books (букварь)
+        TARGET: Text readable by Russian OCR software with 99% accuracy
+        STYLE: Professional Russian educational poster, not artistic
+
+        Generate a Russian educational card that prioritizes TEXT CLARITY above all else.
         """
         
         return improved_prompt.strip()
