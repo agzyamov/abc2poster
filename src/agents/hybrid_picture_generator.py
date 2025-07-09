@@ -14,7 +14,7 @@ import requests
 import base64
 from pathlib import Path
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Literal
 from dotenv import load_dotenv
 from openai import OpenAI
 from PIL import Image
@@ -33,6 +33,31 @@ class GPTImage1PictureGeneratorAgent:
     def __init__(self):
         """Initialize the GPT-Image-1 picture generator."""
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        
+        # Cost optimization settings (configurable via environment variables)
+        image_size_str = os.getenv('IMAGE_SIZE', '1024x1024')  # Options: 1024x1024, 1024x1536, 1536x1024, auto
+        image_quality_str = os.getenv('IMAGE_QUALITY', 'high')  # Options: high, medium, low, auto
+        
+        # Define valid literal types (based on actual gpt-image-1 API)
+        valid_sizes = ['1024x1024', '1024x1536', '1536x1024', 'auto']
+        valid_qualities = ['high', 'medium', 'low', 'auto']
+        
+        # Validate and set size
+        if image_size_str in valid_sizes:
+            self.image_size: Literal['1024x1024', '1024x1536', '1536x1024', 'auto'] = image_size_str  # type: ignore
+        else:
+            logger.warning(f"⚠️ Invalid IMAGE_SIZE '{image_size_str}', using default '1024x1024'")
+            self.image_size = '1024x1024'
+            
+        # Validate and set quality  
+        if image_quality_str in valid_qualities:
+            self.image_quality: Literal['high', 'medium', 'low', 'auto'] = image_quality_str  # type: ignore
+        else:
+            logger.warning(f"⚠️ Invalid IMAGE_QUALITY '{image_quality_str}', using default 'high'")
+            self.image_quality = 'high'
+        
+        # Log cost optimization settings
+        logger.info(f"💰 Cost settings: {self.image_size} @ {self.image_quality} quality")
         
         # Setup storage
         self.storage_dir = Path(os.getenv('STORAGE_PATH', 'generated_images'))
@@ -78,59 +103,73 @@ class GPTImage1PictureGeneratorAgent:
             • Bright, cheerful, child-friendly appearance
             • Light background for educational flashcard style
             
-            CRITICAL TOP MARGIN ENFORCEMENT:
-            • MANDATORY: Leave 25% completely empty white space at the very top
-            • The letter "{valid_letter}" must NEVER be placed near the top edge
-            • Position letter "{valid_letter}" starting at 25% down from the top edge minimum
-            • Bottom word must end at least 25% up from the bottom edge
-            • All text must be MUCH smaller to ensure complete containment
+            EXTREME MARGIN ENFORCEMENT - ABSOLUTELY NO CUTOFF ALLOWED:
+            • MANDATORY: Leave 40% completely empty white space at the very top
+            • MANDATORY: Leave 40% completely empty white space at the very bottom
+            • The letter "{valid_letter}" must be positioned FAR FROM the top edge
+            • The word "{valid_word}" must be positioned FAR FROM the bottom edge
+            • Position letter "{valid_letter}" starting at 40% down from the top edge minimum
+            • Position word "{valid_word}" ending at 40% up from the bottom edge minimum
+            • All text must be MICROSCOPIC to ensure complete containment
+            • NEVER let any part of any letter touch or approach any edge
             
-            ULTRA-SAFE LAYOUT ZONES:
-            • TOP MARGIN (0%-25%): Absolutely EMPTY white space - NO content whatsoever
-            • LETTER ZONE (25%-40%): Letter "{valid_letter}" centered, SMALL size for safety
-            • ILLUSTRATION ZONE (40%-60%): Beautiful illustration of {valid_word}
-            • WORD ZONE (60%-75%): Word "{valid_word}" centered, SMALL size for safety
-            • BOTTOM MARGIN (75%-100%): Absolutely EMPTY white space - NO content whatsoever
+            ULTRA-EXTREME LAYOUT ZONES - RIGID BOUNDARIES:
+            • TOP MARGIN (0%-40%): Absolutely EMPTY white space - ZERO content
+            • LETTER ZONE (40%-50%): Letter "{valid_letter}" centered, MICROSCOPIC size
+            • ILLUSTRATION ZONE (50%-50%): Tiny illustration of {valid_word}
+            • WORD ZONE (50%-60%): Word "{valid_word}" centered, MICROSCOPIC size
+            • BOTTOM MARGIN (60%-100%): Absolutely EMPTY white space - ZERO content
             
-            TEXT SIZING - EXTREMELY CONSERVATIVE:
-            • Make letter "{valid_letter}" MUCH SMALLER than normal to guarantee no cutoff
-            • Make word "{valid_word}" MUCH SMALLER than normal to guarantee no cutoff
-            • Better to have tiny readable text than ANY cutoff
-            • Prioritize ZERO cutoff over large text
+            TEXT SIZING - MAKE TEXT INCREDIBLY SMALL:
+            • Make letter "{valid_letter}" MICROSCOPIC - smaller than you think possible
+            • Make word "{valid_word}" MICROSCOPIC - smaller than you think possible
+            • Text should be so small it's almost hard to see but still readable
+            • Better to have barely visible text than ANY cutoff whatsoever
+            • Prioritize ZERO cutoff over ALL other considerations including readability
+            • Text must look tiny and be positioned well within the center zones
             
-            SAFETY POSITIONING RULES:
-            • Letter "{valid_letter}": Center within 25%-40% zone only, never extend beyond
-            • Word "{valid_word}": Center within 60%-75% zone only, never extend beyond  
-            • Massive empty space above letter and below word
-            • Text should look small but perfectly contained
+            POSITIONING RULES - ABSOLUTE CONSTRAINTS:
+            • Letter "{valid_letter}": Must be completely within 40%-50% zone with generous padding
+            • Word "{valid_word}": Must be completely within 50%-60% zone with generous padding
+            • Enormous empty space above letter (40% of entire image height)
+            • Enormous empty space below word (40% of entire image height)
+            • Text should appear very small and safely positioned in center of image
+            • NO part of any text should ever approach the edges
+            
+            REPETITIVE SAFETY INSTRUCTIONS:
+            • DO NOT let "{valid_letter}" touch the top edge
+            • DO NOT let "{valid_word}" touch the bottom edge
+            • Keep text EXTREMELY small
+            • Keep text positioned in the CENTER of the image
+            • Leave MASSIVE margins on all sides
+            • Make text so small that cutoff is impossible
             
             VISUAL STYLE:
             • Clean WHITE background (not black!)
             • Bright, colorful text (red, blue, or similar bright colors)
-            • IMPORTANT: Letter "{valid_letter}" must be ONE SINGLE COLOR (including any dots, diacritical marks, or accents)
-            • If letter has dots like "Ё", make sure dots and letter are the SAME color
-            • Simple, child-friendly illustration of {valid_word} (ёжик/hedgehog) in center
-            • High contrast dark text on light background for readability
+            • IMPORTANT: Letter "{valid_letter}" must be ONE SINGLE COLOR
+            • Simple, child-friendly illustration of {valid_word} in center
+            • High contrast dark text on light background
             • Educational flashcard appearance
-            • Conservative text sizing throughout
+            • Ultra-microscopic text sizing throughout
             
-            ABSOLUTE REQUIREMENTS:
-            • WHITE or light cream background only
-            • 25% clear margin at top (NO EXCEPTIONS)
-            • 25% clear margin at bottom (NO EXCEPTIONS)  
-            • All text completely inside the frame
-            • Use smallest safe sizes to prevent ANY cutoff
+            FINAL ABSOLUTE REQUIREMENTS:
+            • WHITE background only
+            • 40% clear margin at top (ABSOLUTELY NO EXCEPTIONS)
+            • 40% clear margin at bottom (ABSOLUTELY NO EXCEPTIONS)
+            • Text so small it's guaranteed to fit within bounds
+            • Never allow text to approach any edge whatsoever
             • Bright, child-friendly educational style
             
-            Generate with MAXIMUM caution - zero tolerance for text cutoff, must have light background.
+            Generate with EXTREME caution - ZERO tolerance for any cutoff. Make the text TINY and position it in the CENTER.
             """
             
             # Generate with gpt-image-1
             response = self.client.images.generate(
                 model="gpt-image-1",
                 prompt=prompt,
-                size="1024x1024",
-                quality="high"
+                size=self.image_size,
+                quality=self.image_quality
             )
             
             if not response.data or len(response.data) == 0:
