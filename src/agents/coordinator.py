@@ -16,7 +16,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Import Agent 1
-from picture_generator import PictureGeneratorAgent
+from hybrid_picture_generator import GPTImage1PictureGeneratorAgent
 
 # Load environment variables
 load_dotenv()
@@ -82,7 +82,7 @@ class CoordinatorAgent:
         self.output_dir = Path(os.getenv('POSTER_OUTPUT_PATH', './output'))
         
         # Initialize picture generator agent
-        self.picture_agent = PictureGeneratorAgent()
+        self.picture_agent = GPTImage1PictureGeneratorAgent()
         
         # Setup output directory
         self._setup_output_directory()

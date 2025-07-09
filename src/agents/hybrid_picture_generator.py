@@ -72,44 +72,57 @@ class GPTImage1PictureGeneratorAgent:
             prompt = f"""
             Create a children's educational Russian alphabet flashcard for "{valid_letter}" and "{valid_word}".
             
-            CRITICAL MARGIN REQUIREMENTS:
-            • MASSIVE margins: 20% empty space at top, 20% empty space at bottom
-            • Letter "{valid_letter}" must start at least 20% down from the top edge
-            • Word "{valid_word}" must end at least 20% up from the bottom edge
-            • All text elements must be completely inside the image frame
-            • Use smaller text sizes to ensure everything fits with margins
+            BACKGROUND REQUIREMENTS:
+            • MUST have clean WHITE or very light cream background
+            • NO dark or black backgrounds
+            • Bright, cheerful, child-friendly appearance
+            • Light background for educational flashcard style
             
-            SAFE LAYOUT ZONES:
-            • TOP MARGIN (0%-20%): Completely empty white space
-            • LETTER ZONE (20%-35%): Letter "{valid_letter}" centered, smaller size but readable
-            • ILLUSTRATION ZONE (35%-65%): Beautiful illustration of {valid_word}
-            • WORD ZONE (65%-80%): Word "{valid_word}" centered, smaller size but readable  
-            • BOTTOM MARGIN (80%-100%): Completely empty white space
+            CRITICAL TOP MARGIN ENFORCEMENT:
+            • MANDATORY: Leave 25% completely empty white space at the very top
+            • The letter "{valid_letter}" must NEVER be placed near the top edge
+            • Position letter "{valid_letter}" starting at 25% down from the top edge minimum
+            • Bottom word must end at least 25% up from the bottom edge
+            • All text must be MUCH smaller to ensure complete containment
             
-            TEXT SIZING STRATEGY:
-            • Make letter "{valid_letter}" SMALLER to ensure it fits completely in its zone
-            • Make word "{valid_word}" SMALLER to ensure it fits completely in its zone
-            • Better to have smaller readable text than large cut-off text
-            • Prioritize complete visibility over large size
+            ULTRA-SAFE LAYOUT ZONES:
+            • TOP MARGIN (0%-25%): Absolutely EMPTY white space - NO content whatsoever
+            • LETTER ZONE (25%-40%): Letter "{valid_letter}" centered, SMALL size for safety
+            • ILLUSTRATION ZONE (40%-60%): Beautiful illustration of {valid_word}
+            • WORD ZONE (60%-75%): Word "{valid_word}" centered, SMALL size for safety
+            • BOTTOM MARGIN (75%-100%): Absolutely EMPTY white space - NO content whatsoever
             
-            POSITIONING RULES:
-            • Center letter "{valid_letter}" horizontally and within its 15% height zone
-            • Center word "{valid_word}" horizontally and within its 15% height zone
-            • Leave abundant space above letter and below word
-            • No text should extend beyond its allocated zone
+            TEXT SIZING - EXTREMELY CONSERVATIVE:
+            • Make letter "{valid_letter}" MUCH SMALLER than normal to guarantee no cutoff
+            • Make word "{valid_word}" MUCH SMALLER than normal to guarantee no cutoff
+            • Better to have tiny readable text than ANY cutoff
+            • Prioritize ZERO cutoff over large text
+            
+            SAFETY POSITIONING RULES:
+            • Letter "{valid_letter}": Center within 25%-40% zone only, never extend beyond
+            • Word "{valid_word}": Center within 60%-75% zone only, never extend beyond  
+            • Massive empty space above letter and below word
+            • Text should look small but perfectly contained
             
             VISUAL STYLE:
-            • Clean, simple design with generous white space
-            • Bright, cheerful colors for text and illustration
-            • Simple illustration of {valid_word} (елка/tree) in center
-            • High contrast between text and background
+            • Clean WHITE background (not black!)
+            • Bright, colorful text (red, blue, or similar bright colors)
+            • IMPORTANT: Letter "{valid_letter}" must be ONE SINGLE COLOR (including any dots, diacritical marks, or accents)
+            • If letter has dots like "Ё", make sure dots and letter are the SAME color
+            • Simple, child-friendly illustration of {valid_word} (ёжик/hedgehog) in center
+            • High contrast dark text on light background for readability
+            • Educational flashcard appearance
+            • Conservative text sizing throughout
             
-            FINAL SAFETY CHECK:
-            • Ensure 20% clear margin at top and bottom
-            • Verify all text is completely contained
-            • Use conservative sizing for guaranteed fit
+            ABSOLUTE REQUIREMENTS:
+            • WHITE or light cream background only
+            • 25% clear margin at top (NO EXCEPTIONS)
+            • 25% clear margin at bottom (NO EXCEPTIONS)  
+            • All text completely inside the frame
+            • Use smallest safe sizes to prevent ANY cutoff
+            • Bright, child-friendly educational style
             
-            Generate with extreme caution to avoid ANY text cutoff.
+            Generate with MAXIMUM caution - zero tolerance for text cutoff, must have light background.
             """
             
             # Generate with gpt-image-1
