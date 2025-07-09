@@ -75,7 +75,7 @@
 ## Code Quality
 - Follow SOLID principles
 - Prefer composition over inheritance
-- Use TypeScript/type hints where available
+- Use TypeScript/type hints where available`
 - Avoid deep nesting (max 3-4 levels)
 - Extract magic numbers into named constants
 - Use early returns to reduce nesting
