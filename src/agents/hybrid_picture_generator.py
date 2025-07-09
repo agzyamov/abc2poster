@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
-Hybrid Picture Generator Agent for Russian ABC Poster.
+GPT-Image-1 Picture Generator Agent for Russian ABC Poster.
 
-This agent uses a hybrid approach:
-1. DALL-E 3 generates ONLY the illustration (no text)
-2. Python PIL programmatically adds perfect Cyrillic text overlay
-
-This guarantees readable Cyrillic text while keeping AI-generated beautiful illustrations.
+This agent uses OpenAI's latest gpt-image-1 model for direct generation
+of Russian alphabet cards with Cyrillic text and illustrations.
 """
 
 import os
@@ -14,12 +11,13 @@ import sys
 import json
 import logging
 import requests
+import base64
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Tuple, Literal, Union
+from typing import Dict
 from dotenv import load_dotenv
 from openai import OpenAI
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 import io
 
 # Setup logging
@@ -29,22 +27,12 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-class HybridPictureGeneratorAgent:
-    """Hybrid generator that combines AI illustrations with programmatic Cyrillic text."""
+class GPTImage1PictureGeneratorAgent:
+    """GPT-Image-1 generator for Russian alphabet cards with direct Cyrillic text generation."""
     
     def __init__(self):
-        """Initialize the hybrid picture generator."""
+        """Initialize the GPT-Image-1 picture generator."""
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        self.model = os.getenv('DALLE_MODEL', 'dall-e-3')
-        
-        # Configure image size
-        size_input = os.getenv('IMAGE_SIZE', '1024x1024')
-        valid_sizes: list[Literal['256x256', '512x512', '1024x1024', '1024x1792', '1792x1024']] = [
-            '256x256', '512x512', '1024x1024', '1024x1792', '1792x1024'
-        ]
-        self.image_size: Literal['256x256', '512x512', '1024x1024', '1024x1792', '1792x1024'] = (
-            size_input if size_input in valid_sizes else '1024x1024'
-        )
         
         # Setup storage
         self.storage_dir = Path(os.getenv('STORAGE_PATH', 'generated_images'))
@@ -59,7 +47,7 @@ class HybridPictureGeneratorAgent:
             logger.error(f"❌ Failed to setup storage: {e}")
             raise
     
-    def validate_input(self, letter: str, word: str) -> Tuple[str, str]:
+    def validate_input(self, letter: str, word: str) -> tuple[str, str]:
         """Validate and clean input parameters."""
         if not letter or not word:
             raise ValueError("Letter and word cannot be empty")
@@ -72,203 +60,116 @@ class HybridPictureGeneratorAgent:
         
         return letter, word
     
-    def generate_illustration_prompt(self, word: str) -> str:
-        """Generate prompt for DALL-E 3 that focuses ONLY on illustration (no text)."""
-        
-        prompt = f"""
-        Create a beautiful children's book illustration of {word} (Russian: {word}).
-        
-        CRITICAL: NO TEXT OR LETTERS IN THE IMAGE.
-        
-        ILLUSTRATION REQUIREMENTS:
-        • Simple, clean cartoon style suitable for children
-        • Bright, cheerful colors
-        • Educational and child-friendly design
-        • Clear, recognizable depiction of {word}
-        • Professional children's book illustration quality
-        • White or very light background
-        • Central composition with some space around the edges
-        
-        ABSOLUTELY NO TEXT:
-        • Do not include any letters, words, or text
-        • Do not include Russian or English text
-        • Focus purely on the visual illustration
-        • Clean illustration without any typography
-        
-        Style: Modern children's educational illustration, similar to picture books.
-        Reference style: Simple, cute, educational cartoon illustration.
-        """
-        
-        return prompt.strip()
-    
-    def generate_illustration(self, word: str) -> str:
-        """Generate illustration using DALL-E 3 (text-free)."""
+    def generate_picture(self, letter: str, word: str) -> Dict:
+        """Generate Russian alphabet card using gpt-image-1 model."""
         try:
-            logger.info(f"🎨 Generating illustration for {word} (no text)...")
+            # Validate input
+            valid_letter, valid_word = self.validate_input(letter, word)
             
-            prompt = self.generate_illustration_prompt(word)
+            logger.info(f"🚀 Starting gpt-image-1 generation for {valid_letter} - {valid_word}")
             
+            # Create detailed prompt for gpt-image-1
+            prompt = f"""
+            Create a children's educational Russian alphabet flashcard for "{valid_letter}" and "{valid_word}".
+            
+            CRITICAL MARGIN REQUIREMENTS:
+            • MASSIVE margins: 20% empty space at top, 20% empty space at bottom
+            • Letter "{valid_letter}" must start at least 20% down from the top edge
+            • Word "{valid_word}" must end at least 20% up from the bottom edge
+            • All text elements must be completely inside the image frame
+            • Use smaller text sizes to ensure everything fits with margins
+            
+            SAFE LAYOUT ZONES:
+            • TOP MARGIN (0%-20%): Completely empty white space
+            • LETTER ZONE (20%-35%): Letter "{valid_letter}" centered, smaller size but readable
+            • ILLUSTRATION ZONE (35%-65%): Beautiful illustration of {valid_word}
+            • WORD ZONE (65%-80%): Word "{valid_word}" centered, smaller size but readable  
+            • BOTTOM MARGIN (80%-100%): Completely empty white space
+            
+            TEXT SIZING STRATEGY:
+            • Make letter "{valid_letter}" SMALLER to ensure it fits completely in its zone
+            • Make word "{valid_word}" SMALLER to ensure it fits completely in its zone
+            • Better to have smaller readable text than large cut-off text
+            • Prioritize complete visibility over large size
+            
+            POSITIONING RULES:
+            • Center letter "{valid_letter}" horizontally and within its 15% height zone
+            • Center word "{valid_word}" horizontally and within its 15% height zone
+            • Leave abundant space above letter and below word
+            • No text should extend beyond its allocated zone
+            
+            VISUAL STYLE:
+            • Clean, simple design with generous white space
+            • Bright, cheerful colors for text and illustration
+            • Simple illustration of {valid_word} (елка/tree) in center
+            • High contrast between text and background
+            
+            FINAL SAFETY CHECK:
+            • Ensure 20% clear margin at top and bottom
+            • Verify all text is completely contained
+            • Use conservative sizing for guaranteed fit
+            
+            Generate with extreme caution to avoid ANY text cutoff.
+            """
+            
+            # Generate with gpt-image-1
             response = self.client.images.generate(
-                model=self.model,
+                model="gpt-image-1",
                 prompt=prompt,
-                size=self.image_size,
-                quality="standard",
-                n=1,
+                size="1024x1024",
+                quality="high"
             )
             
             if not response.data or len(response.data) == 0:
-                raise Exception("No image data received from OpenAI API")
+                raise Exception("No image data received from gpt-image-1")
             
-            image_url = response.data[0].url
-            if not image_url:
-                raise Exception("No image URL received from OpenAI API")
-                
-            logger.info(f"✅ Illustration generated successfully for {word}")
+            # Handle base64 response
+            if hasattr(response.data[0], 'b64_json') and response.data[0].b64_json:
+                image_data = response.data[0].b64_json
+                image_bytes = base64.b64decode(image_data)
+                logger.info(f"✅ gpt-image-1 generated image with base64 data")
+            elif hasattr(response.data[0], 'url') and response.data[0].url:
+                # Handle URL response (fallback)
+                image_url = response.data[0].url
+                img_response = requests.get(image_url, timeout=30)
+                img_response.raise_for_status()
+                image_bytes = img_response.content
+                logger.info(f"✅ gpt-image-1 generated image with URL")
+            else:
+                raise Exception("No image data or URL received from gpt-image-1")
             
-            return image_url
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to generate illustration for {word}: {e}")
-            raise
-    
-    def download_illustration(self, image_url: str, letter: str, word: str) -> Image.Image:
-        """Download illustration from URL and return PIL Image."""
-        try:
-            logger.info(f"💾 Downloading illustration for {letter} - {word}...")
-            
-            response = requests.get(image_url, timeout=30)
-            response.raise_for_status()
-            
-            # Load image into PIL
-            image = Image.open(io.BytesIO(response.content))
-            
-            logger.info(f"✅ Illustration downloaded successfully")
-            return image
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to download illustration: {e}")
-            raise
-    
-    def get_font_path(self, font_size: int, bold: bool = True) -> Union[ImageFont.FreeTypeFont, ImageFont.ImageFont]:
-        """Get appropriate font for Cyrillic text."""
-        # Try to find system fonts that support Cyrillic
-        possible_fonts = [
-            # macOS fonts
-            "/System/Library/Fonts/Arial.ttf",
-            "/System/Library/Fonts/Helvetica.ttc", 
-            "/System/Library/Fonts/Times.ttc",
-            # Windows fonts
-            "C:/Windows/Fonts/arial.ttf",
-            "C:/Windows/Fonts/times.ttf",
-            # Linux fonts
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        ]
-        
-        for font_path in possible_fonts:
-            try:
-                if Path(font_path).exists():
-                    font = ImageFont.truetype(font_path, font_size)
-                    logger.info(f"📝 Using font: {font_path}")
-                    return font
-            except Exception:
-                continue
-        
-        # Fallback to default font
-        logger.warning("⚠️ Using default font - Cyrillic may not display correctly")
-        return ImageFont.load_default()
-    
-    def add_cyrillic_text_overlay(self, image: Image.Image, letter: str, word: str) -> Image.Image:
-        """Add perfect Cyrillic text overlay to the illustration with simplified approach."""
-        try:
-            logger.info(f"📝 Adding simplified Cyrillic text overlay: {letter}/{word}")
-            
-            # Create a copy to work with
-            img_with_text = image.copy()
-            draw = ImageDraw.Draw(img_with_text)
-            
-            # Get image dimensions
-            img_width, img_height = img_with_text.size
-            
-            # Font sizes for clear readability
-            letter_font_size = int(img_height * 0.12)  # 12% of image height
-            word_font_size = int(img_height * 0.08)    # 8% of image height
-            
-            # Get fonts
-            letter_font = self.get_font_path(letter_font_size, bold=True)
-            word_font = self.get_font_path(word_font_size, bold=True)
-            
-            # Simple colors for maximum contrast
-            text_color = (0, 0, 0)      # Pure black
-            bg_color = (255, 255, 255)  # Pure white
-            
-            # Add letter at top
-            letter_bbox = draw.textbbox((0, 0), letter, font=letter_font)
-            letter_width = letter_bbox[2] - letter_bbox[0]
-            letter_height = letter_bbox[3] - letter_bbox[1]
-            
-            # Position letter at top center
-            letter_x = (img_width - letter_width) // 2
-            letter_y = int(img_height * 0.05)  # 5% from top
-            
-            # Draw simple background for letter
-            padding = 25
-            letter_bg_coords = [
-                letter_x - padding,
-                letter_y - padding,
-                letter_x + letter_width + padding,
-                letter_y + letter_height + padding
-            ]
-            draw.rectangle(letter_bg_coords, fill=bg_color, outline=(0, 0, 0), width=2)
-            
-            # Draw letter
-            draw.text((letter_x, letter_y), letter, font=letter_font, fill=text_color)
-            
-            # Add word at bottom
-            word_bbox = draw.textbbox((0, 0), word, font=word_font)
-            word_width = word_bbox[2] - word_bbox[0]
-            word_height = word_bbox[3] - word_bbox[1]
-            
-            # Position word at bottom center
-            word_x = (img_width - word_width) // 2
-            word_y = int(img_height * 0.88) - word_height  # 12% from bottom
-            
-            # Draw simple background for word
-            word_bg_coords = [
-                word_x - padding,
-                word_y - padding,
-                word_x + word_width + padding,
-                word_y + word_height + padding
-            ]
-            draw.rectangle(word_bg_coords, fill=bg_color, outline=(0, 0, 0), width=2)
-            
-            # Draw word
-            draw.text((word_x, word_y), word, font=word_font, fill=text_color)
-            
-            logger.info(f"✅ Simplified text overlay added successfully")
-            return img_with_text
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to add text overlay: {e}")
-            raise
-    
-    def save_final_image(self, image: Image.Image, letter: str, word: str) -> Path:
-        """Save the final image with text overlay."""
-        try:
-            filename = f"{letter}_{word}.png"
+            # Save the image
+            image = Image.open(io.BytesIO(image_bytes))
+            filename = f"{valid_letter}_{valid_word}.png"
             filepath = self.storage_dir / filename
+            image.save(filepath, "PNG")
             
-            # Save as PNG with high quality
-            image.save(filepath, "PNG", optimize=True)
+            # Save metadata
+            self.save_metadata(valid_letter, valid_word, filepath, prompt)
             
-            logger.info(f"✅ Final image saved: {filename}")
-            return filepath
+            logger.info(f"🎉 Successfully generated picture for {valid_letter} - {valid_word}")
+            
+            return {
+                "success": True,
+                "letter": valid_letter,
+                "word": valid_word,
+                "filepath": str(filepath),
+                "method": "gpt-image-1",
+                "model": "gpt-image-1"
+            }
             
         except Exception as e:
-            logger.error(f"❌ Failed to save final image: {e}")
-            raise
+            logger.error(f"💥 Generation failed for {letter} - {word}: {e}")
+            
+            return {
+                "success": False,
+                "letter": letter,
+                "word": word,
+                "error": str(e),
+                "method": "gpt-image-1"
+            }
     
-    def save_metadata(self, letter: str, word: str, filepath: Path, illustration_prompt: str) -> None:
+    def save_metadata(self, letter: str, word: str, filepath: Path, prompt: str) -> None:
         """Save generation metadata."""
         metadata = {
             "letter": letter,
@@ -276,11 +177,8 @@ class HybridPictureGeneratorAgent:
             "filename": filepath.name,
             "filepath": str(filepath),
             "timestamp": datetime.now().isoformat(),
-            "image_size": self.image_size,
-            "model": self.model,
-            "generation_method": "hybrid",
-            "illustration_prompt": illustration_prompt,
-            "text_overlay": "programmatic_cyrillic"
+            "model": "gpt-image-1",
+            "prompt": prompt
         }
         
         metadata_path = self.storage_dir / f"{letter}_{word}_metadata.json"
@@ -291,69 +189,6 @@ class HybridPictureGeneratorAgent:
             logger.info(f"📝 Metadata saved: {metadata_path.name}")
         except Exception as e:
             logger.warning(f"⚠️ Failed to save metadata: {e}")
-    
-    def generate_picture(self, letter: str, word: str) -> Dict:
-        """Main function to generate a picture using hybrid approach."""
-        try:
-            # Validate input
-            valid_letter, valid_word = self.validate_input(letter, word)
-            
-            logger.info(f"🚀 Starting hybrid generation for {valid_letter} - {valid_word}")
-            
-            # Check if image already exists
-            expected_filename = f"{valid_letter}_{valid_word}.png"
-            expected_path = self.storage_dir / expected_filename
-            
-            if expected_path.exists():
-                logger.info(f"⚡ Image already exists: {expected_filename}")
-                return {
-                    "success": True,
-                    "letter": valid_letter,
-                    "word": valid_word,
-                    "filepath": str(expected_path),
-                    "cached": True,
-                    "method": "hybrid"
-                }
-            
-            # Step 1: Generate illustration (no text)
-            illustration_url = self.generate_illustration(valid_word)
-            
-            # Step 2: Download illustration
-            illustration_image = self.download_illustration(illustration_url, valid_letter, valid_word)
-            
-            # Step 3: Add Cyrillic text overlay
-            final_image = self.add_cyrillic_text_overlay(illustration_image, valid_letter, valid_word)
-            
-            # Step 4: Save final image
-            filepath = self.save_final_image(final_image, valid_letter, valid_word)
-            
-            # Step 5: Save metadata
-            illustration_prompt = self.generate_illustration_prompt(valid_word)
-            self.save_metadata(valid_letter, valid_word, filepath, illustration_prompt)
-            
-            logger.info(f"🎉 Successfully generated hybrid picture for {valid_letter} - {valid_word}")
-            
-            return {
-                "success": True,
-                "letter": valid_letter,
-                "word": valid_word,
-                "filepath": str(filepath),
-                "cached": False,
-                "method": "hybrid",
-                "illustration_generated": True,
-                "text_overlay_added": True
-            }
-            
-        except Exception as e:
-            logger.error(f"💥 Hybrid generation failed for {letter} - {word}: {e}")
-            
-            return {
-                "success": False,
-                "letter": letter,
-                "word": word,
-                "error": str(e),
-                "method": "hybrid"
-            }
     
     def get_generated_pictures(self) -> list[Path]:
         """Get list of generated picture files."""
@@ -376,29 +211,28 @@ class HybridPictureGeneratorAgent:
 
 
 def main():
-    """CLI interface for the Hybrid Picture Generator Agent."""
+    """CLI interface for the GPT-Image-1 Picture Generator Agent."""
     if len(sys.argv) < 3:
         print("Usage: python hybrid_picture_generator.py <letter> <word>")
         print("Example: python hybrid_picture_generator.py А арбуз")
+        print()
+        print("Uses OpenAI's gpt-image-1 model for direct generation of Russian alphabet cards")
         sys.exit(1)
     
     letter = sys.argv[1]
     word = sys.argv[2]
     
     try:
-        agent = HybridPictureGeneratorAgent()
+        agent = GPTImage1PictureGeneratorAgent()
         result = agent.generate_picture(letter, word)
         
         if result["success"]:
-            print("✅ Hybrid generation completed successfully!")
+            print("✅ Generation completed successfully!")
             print(f"📁 File saved: {result['filepath']}")
-            print(f"🔧 Method: {result['method']}")
-            if result.get("cached"):
-                print("⚡ Used cached image")
-            else:
-                print("🎨 Generated new illustration + text overlay")
+            print(f"🔧 Model: {result['model']}")
+            print("🎨 Generated directly with gpt-image-1")
         else:
-            print("❌ Hybrid generation failed!")
+            print("❌ Generation failed!")
             print(f"💥 Error: {result['error']}")
             sys.exit(1)
             
