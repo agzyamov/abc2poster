@@ -1,7 +1,15 @@
 # Cursor Rules - Generic Development Guidelines
+## Language Preferences
+- **Default Language**: Always write scripts and applications in Python unless explicitly requested otherwise
+- Use Python 3.8+ features and best practices
+- Follow PEP 8 style guidelines for Python code
+- Use type hints where applicable for better code documentation
+- Prefer Python standard library over external dependencies when possible
+- Use virtual environments for dependency management
+
 
 ## Code Style & Formatting
-- Use consistent indentation (2 or 4 spaces, no tabs)
+- Use consistent indentation (4 spaces for Python, 2 or 4 spaces for other languages, no tabs)
 - Keep line length under 100 characters when possible
 - Use meaningful variable and function names (descriptive, not abbreviated)
 - Follow language-specific naming conventions (camelCase for JS/TS, snake_case for Python, etc.)
