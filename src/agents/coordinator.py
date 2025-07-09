@@ -32,6 +32,12 @@ logger = logging.getLogger(__name__)
 class CoordinatorAgent:
     """Agent responsible for coordinating the generation of all A-Z letter pictures."""
     
+    # Correct Russian alphabet order
+    RUSSIAN_ALPHABET_ORDER = [
+        'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 
+        'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'
+    ]
+    
     # Default Russian Cyrillic alphabet word pairs for Russian ABC poster
     DEFAULT_WORD_PAIRS = {
         'А': 'арбуз',      # watermelon
@@ -195,8 +201,8 @@ class CoordinatorAgent:
         results = []
         total_letters = len(self.word_pairs)
         
-        # Determine starting point
-        letters_to_process = list(self.word_pairs.keys())
+        # Determine starting point - use correct Russian alphabet order
+        letters_to_process = self.RUSSIAN_ALPHABET_ORDER
         if resume_from:
             try:
                 start_index = letters_to_process.index(resume_from.upper())
@@ -284,15 +290,15 @@ class CoordinatorAgent:
                     if letter in self.word_pairs:
                         generated_letters.add(letter)
             
-            all_letters = set(self.word_pairs.keys())
+            all_letters = set(self.RUSSIAN_ALPHABET_ORDER)
             missing_letters = all_letters - generated_letters
             
             status = {
                 "total_letters": len(all_letters),
                 "generated_count": len(generated_letters),
                 "missing_count": len(missing_letters),
-                "generated_letters": sorted(list(generated_letters)),
-                "missing_letters": sorted(list(missing_letters)),
+                "generated_letters": [letter for letter in self.RUSSIAN_ALPHABET_ORDER if letter in generated_letters],
+                "missing_letters": [letter for letter in self.RUSSIAN_ALPHABET_ORDER if letter in missing_letters],
                 "completion_percentage": (len(generated_letters) / len(all_letters)) * 100,
                 "storage_directory": str(self.storage_dir)
             }

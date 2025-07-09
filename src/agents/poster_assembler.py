@@ -30,6 +30,12 @@ logger = logging.getLogger(__name__)
 class PosterAssemblerAgent:
     """Agent responsible for assembling all letter pictures into a final poster."""
     
+    # Correct Russian alphabet order
+    RUSSIAN_ALPHABET_ORDER = [
+        'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 
+        'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'
+    ]
+    
     # Default Russian Cyrillic alphabet word pairs (same as coordinator for placeholders)
     DEFAULT_WORD_PAIRS = {
         'А': 'арбуз', 'Б': 'барабан', 'В': 'волк', 'Г': 'гриб', 'Д': 'дом',
@@ -91,11 +97,16 @@ class PosterAssemblerAgent:
                         available_pictures[letter] = file_path
             
             logger.info(f"📊 Found {len(available_pictures)} letter pictures")
-            logger.info(f"✅ Available letters: {', '.join(sorted(available_pictures.keys()))}")
             
-            missing_letters = set(self.DEFAULT_WORD_PAIRS.keys()) - set(available_pictures.keys())
+            # Sort available letters by Russian alphabet order
+            available_ordered = [letter for letter in self.RUSSIAN_ALPHABET_ORDER if letter in available_pictures]
+            logger.info(f"✅ Available letters: {', '.join(available_ordered)}")
+            
+            missing_letters = set(self.RUSSIAN_ALPHABET_ORDER) - set(available_pictures.keys())
             if missing_letters:
-                logger.info(f"❌ Missing letters: {', '.join(sorted(missing_letters))}")
+                # Sort missing letters by Russian alphabet order  
+                missing_ordered = [letter for letter in self.RUSSIAN_ALPHABET_ORDER if letter in missing_letters]
+                logger.info(f"❌ Missing letters: {', '.join(missing_ordered)}")
             
             return available_pictures
             
@@ -225,8 +236,8 @@ class PosterAssemblerAgent:
         Returns:
             2D list representing the poster layout
         """
-        # Create alphabetical order layout
-        all_letters = sorted(self.DEFAULT_WORD_PAIRS.keys())
+        # Create layout using correct Russian alphabet order
+        all_letters = self.RUSSIAN_ALPHABET_ORDER
         layout = []
         
         letter_index = 0
@@ -348,8 +359,8 @@ class PosterAssemblerAgent:
                     'cell_size': self.cell_size
                 },
                 'assembly_stats': stats,
-                'available_letters': sorted(available_pictures.keys()),
-                'missing_letters': sorted(set(self.DEFAULT_WORD_PAIRS.keys()) - set(available_pictures.keys())),
+                'available_letters': [letter for letter in self.RUSSIAN_ALPHABET_ORDER if letter in available_pictures],
+                'missing_letters': [letter for letter in self.RUSSIAN_ALPHABET_ORDER if letter not in available_pictures],
                 'layout': layout
             }
             
@@ -452,13 +463,14 @@ def main():
             # Just scan and report
             available = assembler.scan_available_pictures()
             print(f"\n📊 Available Pictures: {len(available)}")
-            for letter in sorted(available.keys()):
-                print(f"  ✅ {letter} - {available[letter].name}")
+            for letter in assembler.RUSSIAN_ALPHABET_ORDER:
+                if letter in available:
+                    print(f"  ✅ {letter} - {available[letter].name}")
             
-            missing = set(assembler.DEFAULT_WORD_PAIRS.keys()) - set(available.keys())
+            missing = [letter for letter in assembler.RUSSIAN_ALPHABET_ORDER if letter not in available]
             if missing:
                 print(f"\n❌ Missing Pictures: {len(missing)}")
-                for letter in sorted(missing):
+                for letter in missing:
                     word = assembler.DEFAULT_WORD_PAIRS[letter]
                     print(f"  📋 {letter} - {word} (will use placeholder)")
             return
